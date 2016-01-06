@@ -10,19 +10,21 @@ void writeToFile(const double* const u, const string s, const double dx,
                  const double xmin, const int N);
 void initialize(double* const u, const double dx, const double xmin,
                 const int N);
+void step(double* const u0, double* const u1, const double dx, const int N, 
+		const double V, const double dt);
 //---------------------------------------
 int main(){
 
-  const double tEnd = ;
-  const double V = ;
+  const double tEnd = 15;
+  const double V = 1 ;
 
-  const int N  = ;
+  const int N  = 256;
   const double xmin = -10;
   const double xmax =  10;
   const double dx = (xmax-xmin)/(N-1);
-  double dt = ;
+  double dt = dx;
   const int Na = 10; // Number of output files up to tEnd
-  const int Nk = int(tEnd/Na/dt);
+  const int Nk = int(tEnd/Na/dt); //Anzahl der Schritte, nach denen ein Wert abgespeichert wird
 
   double* u0 = new double[N];
   double* u1 = new double[N];
@@ -39,8 +41,12 @@ int main(){
    for(int j=0; j<Nk; j++){
 
       // Put call to step function here
+     step(u0,u1,dx,N,V,dt);
 
-      // swap arrays u0 <-> u1,
+      // swap arrays u0 <-> u1
+     h= u0;
+     u0= u1;
+     u1 = h;
       // however do not copy values, be more clever ;)
    }
    strm.str("");
@@ -78,4 +84,15 @@ void writeToFile(const double* const u, const string s, const double dx,
      out << x << "\t" << u[i] << endl;
    }
    out.close();
+}
+
+//-----------------------------------------------
+void step(double* const u0, double* const u1, const double dx, const int N, const double V, const double dt)
+
+{  
+   u1[0]=-V * dt *(u0[1]-u0[N-1])/dx+u0[0];
+   for(int i=1; i<N-1; i++){
+     u1[i]=-V * dt *(u0[i+1]-u0[i-1])/dx+u0[i];
+   }
+   u1[N-1]=-V * dt *(u0[0]-u0[N-2])/dx+u0[N-1];
 }
